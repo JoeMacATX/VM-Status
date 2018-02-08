@@ -100,8 +100,9 @@ $My_DiskWrite_OutputTable = New-Object System.Collections.ArrayList
 Write-Host -NoNewline "`nCalculating Usage Metrics"              #Does not output to Text File
 Write "`n`Usage Metrics..." | Out-File C:\Temp\$($FileDate)_Azure_Status.txt -append
 $MetricList = @("Percentage CPU", "Network In", "Network Out", "Disk Read Bytes", "Disk Write Bytes")
-$Time1DayAgo = (Get-Date).AddDays(-1).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-$EndTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$TimeNow = (Get-Date)
+$Time1DayAgo = $TimeNow.AddDays(-1).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$EndTime = $TimeNow.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
 foreach ($SingleVM in $MyVMArray)                     #SingleVM is the .id value
 {
@@ -115,73 +116,73 @@ foreach ($SingleVM in $MyVMArray)                     #SingleVM is the .id value
 #CPU values are from [0] as it is first element in $MetricList
     Write-Host -NoNewline "."
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "VMName" -Value $SingleVM.VMName
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-5).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-5).ToUniversalTime().ToString()})
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_5_Min / Max" -value ($($MetricStats.Avg).ToString("0.00") + " / " + $($MetricStats.Max).ToString("0.00"))     
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-60).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-60).ToUniversalTime().ToString()})
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_1_Hr / Max" -value ($($MetricStats.Avg).ToString("0.00") + " / " + $($MetricStats.Max).ToString("0.00"))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-6).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-6).ToUniversalTime().ToString()})
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_6_Hr / Max" -value ($($MetricStats.Avg).ToString("0.00") + " / " + $($MetricStats.Max).ToString("0.00"))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-12).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-12).ToUniversalTime().ToString()})
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_12_Hr / Max" -value ($($MetricStats.Avg).ToString("0.00") + " / " + $($MetricStats.Max).ToString("0.00"))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-24).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[0].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-24).ToUniversalTime().ToString()})
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_1_Day / Max" -value ($($MetricStats.Avg).ToString("0.00") + " / " + $($MetricStats.Max).ToString("0.00"))
     $CPUEntry | Add-Member -MemberType NoteProperty -Name "CPU_30d Baseline" -value $($Baselines | where-object{$_.VM -eq $SingleVM.VMName -and $_.Metric -eq "CPU30d"} | select -expand "Value")
     $My_CPU_OutputTable.Add($CPUEntry) | out-null
 #Net entries are from [1] and [2]
     Write-Host -NoNewline "."
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "VMName" -Value $SingleVM.VMName
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-5).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-5).ToUniversalTime().ToString()})
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_5_Min In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 5)))     
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-60).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-60).ToUniversalTime().ToString()})
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_1_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 60)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-6).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-6).ToUniversalTime().ToString()})
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_6_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 360)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-12).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-12).ToUniversalTime().ToString()})
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_12_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 720)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-24).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[1].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-24).ToUniversalTime().ToString()})
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_1_Day In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 1440)))
     $NetInEntry | Add-Member -MemberType NoteProperty -Name "Net_1d Baseline" -value (ConvertBytes ($Baselines | where-object{$_.VM -eq $SingleVM.VMName -and $_.Metric -eq "NetIn_1Day"} | select -expand "Value"))
     $My_NetIn_OutputTable.Add($NetInEntry) | out-null
     Write-Host -NoNewline "."
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "VMName" -Value $SingleVM.VMName
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-5).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-5).ToUniversalTime().ToString()})
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_5_Min In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 5)))     
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-60).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-60).ToUniversalTime().ToString()})
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_1_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 60)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-6).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-6).ToUniversalTime().ToString()})
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_6_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 360)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-12).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-12).ToUniversalTime().ToString()})
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_12_Hr In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 720)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-24).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[2].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-24).ToUniversalTime().ToString()})
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_1_Day In/BPS" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 1440)))
     $NetOutEntry | Add-Member -MemberType NoteProperty -Name "Net_1d Baseline" -value (ConvertBytes ($Baselines | where-object{$_.VM -eq $SingleVM.VMName -and $_.Metric -eq "NetOut_1Day"} | select -expand "Value"))
     $My_NetOut_OutputTable.Add($NetOutEntry) | out-null
 #Net entries are from [3] and [4]
     Write-Host -NoNewline "."
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "VMName" -Value $SingleVM.VMName
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-5).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-5).ToUniversalTime().ToString()})
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "DiskRead_5_Min" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 5)))     
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-60).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-60).ToUniversalTime().ToString()})
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "DiskRead_1_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 60)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-6).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-6).ToUniversalTime().ToString()})
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "DiskRead_6_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 360)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-12).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-12).ToUniversalTime().ToString()})
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "DiskRead_12_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 720)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-24).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[3].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-24).ToUniversalTime().ToString()})
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "DiskRead_1_Day" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 1440)))
     $DiskReadEntry | Add-Member -MemberType NoteProperty -Name "Read_1d BL" -value (ConvertBytes ($Baselines | where-object{$_.VM -eq $SingleVM.VMName -and $_.Metric -eq "Read_1Day"} | select -expand "Value"))
     $My_DiskRead_OutputTable.Add($DiskReadEntry) | out-null
     Write-Host -NoNewline "."
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "VMName" -Value $SingleVM.VMName
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-5).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-5).ToUniversalTime().ToString()})
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "DiskWrite_5_Min" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 5)))     
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddMinutes(-60).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddMinutes(-60).ToUniversalTime().ToString()})
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "DiskWrite_1_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 60)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-6).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-6).ToUniversalTime().ToString()})
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "DiskWrite_6_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 360)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-12).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-12).ToUniversalTime().ToString()})
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "DiskWrite_12_Hr" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 720)))
-    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt (Get-Date).AddHours(-24).ToUniversalTime().ToString()})
+    $MetricStats = Add_RM_Metrics_Strings ($Metrics[4].data | Where-Object {$_.TimeStamp -gt $TimeNow.AddHours(-24).ToUniversalTime().ToString()})
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "DiskWrite_1_Day" -value ((ConvertBytes $MetricStats.Sum) + " / " + (ConvertBytes ($MetricStats.Sum / 1440)))
     $DiskWriteEntry | Add-Member -MemberType NoteProperty -Name "Write_1d BL" -value (ConvertBytes ($Baselines | where-object{$_.VM -eq $SingleVM.VMName -and $_.Metric -eq "Write_1Day"} | select -expand "Value"))
     $My_DiskWrite_OutputTable.Add($DiskWriteEntry) | out-null
