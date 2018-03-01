@@ -17,26 +17,26 @@ return $Item
 }
 
 $Baselines = New-Object System.Collections.ArrayList
-$Baselines += AddToBaseline 'CygnalDev' 'CPU_30d' '0.14'                  # Baselines are from Azure 30d graphs, ending Feb 8, 2018
-$Baselines += AddToBaseline 'CygnalDev' 'NetIn_30d' 2210000000    
-$Baselines += AddToBaseline 'CygnalDev' 'NetOut_30d' 2000000000   
-$Baselines += AddToBaseline 'CygnalDev' 'Read_30d' 14240000     
-$Baselines += AddToBaseline 'CygnalDev' 'Write_30d' 15790000000   
-$Baselines += AddToBaseline 'LAZDev' 'CPU_30d' '8.68'
-$Baselines += AddToBaseline 'LAZDev' 'NetIn_30d' 23100000000
-$Baselines += AddToBaseline 'LAZDev' 'NetOut_30d' 73930000000   
-$Baselines += AddToBaseline 'LAZDev' 'Read_30d' 55970000000
-$Baselines += AddToBaseline 'LAZDev' 'Write_30d' 60850000000   
-$Baselines += AddToBaseline 'WMDev' 'CPU_30d' '1.94'            
-$Baselines += AddToBaseline 'WMDev' 'NetIn_30d' 3830000000
-$Baselines += AddToBaseline 'WMDev' 'NetOut_30d' 6470000000   
-$Baselines += AddToBaseline 'WMDev' 'Read_30d' 26330000000
-$Baselines += AddToBaseline 'WMDev' 'Write_30d' 253840000000   
-$Baselines += AddToBaseline 'WMReporting' 'CPU_30d' '9.96'
-$Baselines += AddToBaseline 'WMReporting' 'NetIn_30d' 2260000000
-$Baselines += AddToBaseline 'WMReporting' 'NetOut_30d' 4120000000   
-$Baselines += AddToBaseline 'WMReporting' 'Read_30d' 9270000000
-$Baselines += AddToBaseline 'WMReporting' 'Write_30d' 216330000000   
+$Baselines += AddToBaseline 'CygnalDev' 'CPU_30d' '0.13'                  # Baselines are from Azure 30d graphs, ending Mar 1, 2018
+$Baselines += AddToBaseline 'CygnalDev' 'NetIn_30d' 1990000000    
+$Baselines += AddToBaseline 'CygnalDev' 'NetOut_30d' 1690000000   
+$Baselines += AddToBaseline 'CygnalDev' 'Read_30d' 376200000     
+$Baselines += AddToBaseline 'CygnalDev' 'Write_30d' 15350000000   
+$Baselines += AddToBaseline 'LAZDev' 'CPU_30d' '8.7'
+$Baselines += AddToBaseline 'LAZDev' 'NetIn_30d' 25040000000
+$Baselines += AddToBaseline 'LAZDev' 'NetOut_30d' 82980000000   
+$Baselines += AddToBaseline 'LAZDev' 'Read_30d' 74880000000
+$Baselines += AddToBaseline 'LAZDev' 'Write_30d' 74580000000   
+$Baselines += AddToBaseline 'WMDev' 'CPU_30d' '2.22'            
+$Baselines += AddToBaseline 'WMDev' 'NetIn_30d' 6380000000
+$Baselines += AddToBaseline 'WMDev' 'NetOut_30d' 9230000000   
+$Baselines += AddToBaseline 'WMDev' 'Read_30d' 38420000000
+$Baselines += AddToBaseline 'WMDev' 'Write_30d' 276860000000   
+$Baselines += AddToBaseline 'WMReporting' 'CPU_30d' '8.80'
+$Baselines += AddToBaseline 'WMReporting' 'NetIn_30d' 2270000000
+$Baselines += AddToBaseline 'WMReporting' 'NetOut_30d' 4140000000   
+$Baselines += AddToBaseline 'WMReporting' 'Read_30d' 4780000000
+$Baselines += AddToBaseline 'WMReporting' 'Write_30d' 147010000000   
 
 # End notes section
 
@@ -68,7 +68,11 @@ function Add_RM_Metrics_Strings($array)
 }
 
 Write "`nVM-List" | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
+$TimeNow = Get-Date -second 0
+Write-Host -NoNewline "."
 $VMList = Get-AzureRmVM
+Get-AzureRmRecoveryServicesVault -Name "LazBackup" -ResourceGroupName "Laz" | Set-AzureRmRecoveryServicesVaultContext                          #Name of recovery services vault and resource group hard coded
+
 $MyVMArray = New-Object System.Collections.ArrayList
 foreach ($vm in $VMList)
 {
@@ -84,11 +88,16 @@ foreach ($vm in $VMList)
     $Entry | Add-Member -MemberType NoteProperty -Name "ID" -Value $vm.Id
     $Entry | Add-Member -MemberType NoteProperty -Name "Pub_IP" -Value ((Get-AzureRmPublicIpAddress -ResourceGroupName $vm.ResourceGroupName).IpAddress)
     $Entry | Add-Member -MemberType NoteProperty -Name "IP_Method" -Value ((Get-AzureRmPublicIpAddress -ResourceGroupName $vm.ResourceGroupName).PublicIpAllocationMethod)
-
+    $nameContainer = Get-AzureRmRecoveryServicesBackupContainer -ContainerType "AzureVM" -Status "Registered" -FriendlyName $vm.Name
+    $Backup = Get-AzureRmRecoveryServicesBackupItem -Container $nameContainer -WorkloadType "AzureVM" #| select ContainerName,LatestRecoveryPoint
+    $Backup2 = Get-AzureRmRecoveryServicesBackupRecoveryPoint -Item $Backup -StartDate $TimeNow.AddDays(-30).ToUniversalTime() -EndDate $TimeNow.ToUniversalTime()
+    $Entry | Add-Member -MemberType NoteProperty -Name "Recent_Backup(ET)" -Value $Backup.LatestRecoveryPoint.AddHours(-5).ToString("yyyy-MM-dd HH:mm:ss")        #Hard code -5 hours for Eastern Time
+    $Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value $Backup2[-1].RecoveryPointTime.AddHours(-5).ToString("yyyy-MM-dd HH:mm:ss")        #Hard code -5 hours for Eastern Time
+    Write-Host -NoNewline "."
     $MyVMArray.Add($Entry) | out-null
 }
 
-$MyVMArray | Select-Object VMName,ResGroup,OSType,Size,Cores,Memory_GB,Pub_IP,IP_Method | Format-Table -autosize | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
+$MyVMArray | Select-Object VMName,ResGroup,OSType,Size,Cores,Memory_GB,Pub_IP,IP_Method,'Earliest_Backup(ET)','Recent_Backup(ET)' | Format-Table -autosize | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
 $NoteA | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
 
 
@@ -100,7 +109,6 @@ $My_DiskWrite_OutputTable = New-Object System.Collections.ArrayList
 Write-Host -NoNewline "`nCalculating Usage Metrics"              #Does not output to Text File
 Write "`n`Usage Metrics..." | Out-File C:\Temp\$($FileDate)_Azure_Status.txt -append
 $MetricList = @("Percentage CPU", "Network In", "Network Out", "Disk Read Bytes", "Disk Write Bytes")
-$TimeNow = Get-Date -second 0
 $TimeGrain = '00:05:00'
 $GrainMin = 5
 $DataPerMin = 41                                                 # When Get-AzureRMMetric is called with -AggregationType None, the count per timeslice is returned.  41 counts/min
@@ -202,4 +210,9 @@ $My_NetIn_OutputTable | Format-Table -autosize | Tee-Object -file C:\Temp\$($Fil
 $My_NetOut_OutputTable | Format-Table -autosize | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
 $My_DiskRead_OutputTable | Format-Table -autosize | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
 $My_DiskWrite_OutputTable | Format-Table -autosize | Tee-Object -file C:\Temp\$($FileDate)_Azure_Status.txt -append
+
+
+
+
+
 
