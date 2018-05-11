@@ -1,3 +1,4 @@
+﻿if ([string]::IsNullOrEmpty($(Get-AzureRmContext).Account)) {Login-AzureRmAccount}
 
 Clear
 
@@ -14,10 +15,6 @@ return $Item
 }
 
 $Baselines = New-Object System.Collections.ArrayList
-$Baselines += AddToBaseline 'CygnalDev' 'CPU_30d' '0.13'                  # Baselines are from Azure 30d graphs, ending Mar 1, 2018
-$Baselines += AddToBaseline 'CygnalDev' 'NetIn_30d' 1990000000    
-$Baselines += AddToBaseline 'CygnalDev' 'NetOut_30d' 1690000000   
-$Baselines += AddToBaseline 'CygnalDev' 'Read_30d' 376200000     
 $Baselines += AddToBaseline 'CygnalDev' 'CPU_30d'      '0.0'                  # Baselines are from Azure 30d graphs, ending May 1, 2018
 $Baselines += AddToBaseline 'CygnalDev' 'NetIn_30d'     0    
 $Baselines += AddToBaseline 'CygnalDev' 'NetOut_30d'    0   
@@ -116,12 +113,13 @@ foreach ($vm in $VMList)
         $Backup = Get-AzureRmRecoveryServicesBackupItem -Container $nameContainer -WorkloadType "AzureVM"   #| select ContainerName,LatestRecoveryPoint
         $Backup2 = Get-AzureRmRecoveryServicesBackupRecoveryPoint -Item $Backup -StartDate $TimeNow.AddDays(-30).ToUniversalTime() -EndDate $TimeNow.ToUniversalTime()
         $Entry | Add-Member -MemberType NoteProperty -Name "Recent_Backup(ET)" -Value $Backup.LatestRecoveryPoint.AddHours(-5).ToString("yyyy-MM-dd HH:mm:ss")        #Hard code -5 hours for Eastern Time
-        $Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value $Backup2[-1].RecoveryPointTime.AddHours(-5).ToString("yyyy-MM-dd HH:mm:ss")        #Hard code -5 hours for Eastern Time
+        if ($Backup2 -ne $null) {$Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value $Backup2[-1].RecoveryPointTime.AddHours(-5).ToString("yyyy-MM-dd HH:mm:ss")}        #Hard code -5 hours for Eastern Time
+                 Else {$Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value 'No-data'}
         }
     Else
         {
-        $Entry | Add-Member -MemberType NoteProperty -Name "Recent_Backup(ET)" -Value 'No data'        #Hard code -5 hours for Eastern Time
-        $Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value 'No-data'        #Hard code -5 hours for Eastern Time
+        $Entry | Add-Member -MemberType NoteProperty -Name "Recent_Backup(ET)" -Value 'No data'        
+        $Entry | Add-Member -MemberType NoteProperty -Name "Earliest_Backup(ET)" -Value 'No-data'        
         }
     $Entry | Add-Member -MemberType NoteProperty -Name "Location" -Value $vm.Location
     $Entry | Add-Member -MemberType NoteProperty -Name "ID" -Value $vm.Id
