@@ -15,36 +15,36 @@ return $Item
 }
 
 $Baselines = New-Object System.Collections.ArrayList
-$Baselines += AddToBaseline 'CygnalDev' 'CPU_30d'      '0.0'                  # Baselines are from Azure 30d graphs, ending May 1, 2018
+$Baselines += AddToBaseline 'CygnalDev' 'CPU_30d'      '0.0'                  # Baselines are from Azure 30d graphs, ending Jun 2, 2018
 $Baselines += AddToBaseline 'CygnalDev' 'NetIn_30d'     0    
 $Baselines += AddToBaseline 'CygnalDev' 'NetOut_30d'    0   
 $Baselines += AddToBaseline 'CygnalDev' 'Read_30d'      0     
 $Baselines += AddToBaseline 'CygnalDev' 'Write_30d'     0   
-$Baselines += AddToBaseline 'LAZDev' 'CPU_30d'         '4.85'
-$Baselines += AddToBaseline 'LAZDev' 'NetIn_30d'       23820000000
-$Baselines += AddToBaseline 'LAZDev' 'NetOut_30d'      40290000000   
-$Baselines += AddToBaseline 'LAZDev' 'Read_30d'        96410000000
-$Baselines += AddToBaseline 'LAZDev' 'Write_30d'       64710000000   
-$Baselines += AddToBaseline 'WMDev' 'CPU_30d'          '1.21'            
-$Baselines += AddToBaseline 'WMDev' 'NetIn_30d'         5920000000
-$Baselines += AddToBaseline 'WMDev' 'NetOut_30d'       10240000000   
-$Baselines += AddToBaseline 'WMDev' 'Read_30d'        262400000000
-$Baselines += AddToBaseline 'WMDev' 'Write_30d'       501810000000   
-$Baselines += AddToBaseline 'WMReporting' 'CPU_30d'    '15.62'
-$Baselines += AddToBaseline 'WMReporting' 'NetIn_30d'   7950000000
-$Baselines += AddToBaseline 'WMReporting' 'NetOut_30d'  1920000000   
-$Baselines += AddToBaseline 'WMReporting' 'Read_30d'   31370000000
-$Baselines += AddToBaseline 'WMReporting' 'Write_30d' 151410000000   
-$Baselines += AddToBaseline 'Kiwi' 'CPU_30d'           '1.34'
-$Baselines += AddToBaseline 'Kiwi' 'NetIn_30d'          8450000000
-$Baselines += AddToBaseline 'Kiwi' 'NetOut_30d'         1800000000   
-$Baselines += AddToBaseline 'Kiwi' 'Read_30d'         104200000000
-$Baselines += AddToBaseline 'Kiwi' 'Write_30d'        117850000000   
-$Baselines += AddToBaseline 'Apple' 'CPU_30d'          '0.42'
-$Baselines += AddToBaseline 'Apple' 'NetIn_30d'         8170000000
-$Baselines += AddToBaseline 'Apple' 'NetOut_30d'        1170000000   
-$Baselines += AddToBaseline 'Apple' 'Read_30d'         58650000000
-$Baselines += AddToBaseline 'Apple' 'Write_30d'        81650000000   
+$Baselines += AddToBaseline 'LAZDev' 'CPU_30d'         '4.15'
+$Baselines += AddToBaseline 'LAZDev' 'NetIn_30d'       28070000000
+$Baselines += AddToBaseline 'LAZDev' 'NetOut_30d'      36030000000   
+$Baselines += AddToBaseline 'LAZDev' 'Read_30d'       102980000000
+$Baselines += AddToBaseline 'LAZDev' 'Write_30d'       64320000000   
+$Baselines += AddToBaseline 'WMDev' 'CPU_30d'          '1.98'            
+$Baselines += AddToBaseline 'WMDev' 'NetIn_30d'         9590000000
+$Baselines += AddToBaseline 'WMDev' 'NetOut_30d'        9880000000   
+$Baselines += AddToBaseline 'WMDev' 'Read_30d'        189760000000
+$Baselines += AddToBaseline 'WMDev' 'Write_30d'       347680000000   
+$Baselines += AddToBaseline 'WMReporting' 'CPU_30d'    '15.32'
+$Baselines += AddToBaseline 'WMReporting' 'NetIn_30d'   8880000000
+$Baselines += AddToBaseline 'WMReporting' 'NetOut_30d'  1780000000   
+$Baselines += AddToBaseline 'WMReporting' 'Read_30d'   32640000000
+$Baselines += AddToBaseline 'WMReporting' 'Write_30d' 196170000000   
+$Baselines += AddToBaseline 'Kiwi' 'CPU_30d'           '0.62'
+$Baselines += AddToBaseline 'Kiwi' 'NetIn_30d'          3870000000
+$Baselines += AddToBaseline 'Kiwi' 'NetOut_30d'         2770000000   
+$Baselines += AddToBaseline 'Kiwi' 'Read_30d'         116370000000
+$Baselines += AddToBaseline 'Kiwi' 'Write_30d'        184040000000   
+$Baselines += AddToBaseline 'Apple' 'CPU_30d'          '1.04'
+$Baselines += AddToBaseline 'Apple' 'NetIn_30d'         8840000000
+$Baselines += AddToBaseline 'Apple' 'NetOut_30d'        3200000000   
+$Baselines += AddToBaseline 'Apple' 'Read_30d'        150200000000
+$Baselines += AddToBaseline 'Apple' 'Write_30d'       199490000000   
 
 # End notes section
 
